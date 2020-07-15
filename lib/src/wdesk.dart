@@ -114,7 +114,7 @@ class WdeskTodoSdk implements TodoSdk {
   _initialize() async {
     // Set up an RPC client.
     final service =
-        messaging_sdk.newServiceDescriptor(natsSubject: 'v1.todo-service');
+        messaging_sdk.newServiceDescriptor(natsSubject: 'todo2-service');
     final rpcProvider = _natsMessagingClient.newClient(service);
     await rpcProvider.transport.open();
 

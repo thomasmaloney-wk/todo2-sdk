@@ -10,24 +10,24 @@ import 'package:todo2_sdk/src/todo_sdk.dart';
 class WdeskTodoSdk implements TodoSdk {
   static Todo decode(todo_frugal.Todo serviceTodo) {
     return Todo(
-      accountID: serviceTodo.accountID,
-      id: serviceTodo.id,
-      description: serviceTodo.description,
-      isCompleted: serviceTodo.isCompleted,
-      isPublic: serviceTodo.isPublic,
-      notes: serviceTodo.notes,
-      userID: serviceTodo.userID
-    );
+        accountID: serviceTodo.accountID,
+        id: serviceTodo.id,
+        description: serviceTodo.description,
+        isCompleted: serviceTodo.isCompleted,
+        isPublic: serviceTodo.isPublic,
+        notes: serviceTodo.notes,
+        userID: serviceTodo.userID);
   }
 
   static todo_frugal.Todo encode(Todo clientTodo) {
     return todo_frugal.Todo()
-        ..description = clientTodo.description
-        ..id = clientTodo.id
-        ..isCompleted = clientTodo.isCompleted
-        ..isPublic = clientTodo.isPublic
-        ..notes = clientTodo.notes
-        ..userID = clientTodo.userID ?? null;
+      ..description = clientTodo.description
+      ..id = clientTodo.id
+      ..isCompleted = clientTodo.isCompleted
+      ..isPublic = clientTodo.isPublic
+      ..notes = clientTodo.notes
+      ..userID = clientTodo.userID ?? null
+      ..accountID = clientTodo.accountID ?? null;
   }
 
   final messaging_sdk.NatsMessagingClient _natsMessagingClient;
@@ -65,7 +65,7 @@ class WdeskTodoSdk implements TodoSdk {
   Future<Todo> createTodo(Todo clientTodo) async {
     todo_frugal.FTodoServiceClient service = await _getTodoSdk();
     frugal.FContext ctx = _natsMessagingClient.createFContext();
-    todo_frugal.Todo created = 
+    todo_frugal.Todo created =
         await service.createTodo(ctx, encode(clientTodo));
     return decode(created);
   }
@@ -81,20 +81,20 @@ class WdeskTodoSdk implements TodoSdk {
   /// Query for to-dos.
   @override
   Future<List<Todo>> queryTodos(
-    {bool includeComplete: false,
-    bool includeIncomplete: false,
-    bool includePrivate: false,
-    bool includePublic: false}) async {
-      todo_frugal.FTodoServiceClient service = await _getTodoSdk();
-      frugal.FContext ctx = _natsMessagingClient.createFContext();
-      todo_frugal.TodoQueryParams params = todo_frugal.TodoQueryParams()
-        ..includeComplete = includeComplete
-        ..includeIncomplete = includeIncomplete
-        ..includePrivate = includePrivate
-        ..includePublic = includePublic;
-      
-      List<todo_frugal.Todo> todos = await service.queryTodos(ctx, params);
-      return todos.map((todo) => decode(todo)).toList();
+      {bool includeComplete: false,
+      bool includeIncomplete: false,
+      bool includePrivate: false,
+      bool includePublic: false}) async {
+    todo_frugal.FTodoServiceClient service = await _getTodoSdk();
+    frugal.FContext ctx = _natsMessagingClient.createFContext();
+    todo_frugal.TodoQueryParams params = todo_frugal.TodoQueryParams()
+      ..includeComplete = includeComplete
+      ..includeIncomplete = includeIncomplete
+      ..includePrivate = includePrivate
+      ..includePublic = includePublic;
+
+    List<todo_frugal.Todo> todos = await service.queryTodos(ctx, params);
+    return todos.map((todo) => decode(todo)).toList();
   }
 
   /// Update a to-do.
@@ -131,26 +131,26 @@ class WdeskTodoSdk implements TodoSdk {
 
   // The RPC client is obtained asynchronously. RPC methods will use this to
   // ensure that the client is available before trying to use it.
-  Future<todo_frugal.FTodoServiceClient> _getTodoSdk() => _todoSdkCompleter.future;
+  Future<todo_frugal.FTodoServiceClient> _getTodoSdk() =>
+      _todoSdkCompleter.future;
 
   void _subscribe() {
     _todosSubscriber
-        .subscribeTodoCreated(_accountResourceId, _membershipResourceId, 
+        .subscribeTodoCreated(_accountResourceId, _membershipResourceId,
             (frugal.FContext context, todo_frugal.Todo todo) {
-        _todoCreated.add(decode(todo));
+      _todoCreated.add(decode(todo));
     });
 
     _todosSubscriber
-        .subscribeTodoDeleted(_accountResourceId, _membershipResourceId, 
+        .subscribeTodoDeleted(_accountResourceId, _membershipResourceId,
             (frugal.FContext context, todo_frugal.Todo todo) {
-        _todoDeleted.add(decode(todo));
+      _todoDeleted.add(decode(todo));
     });
 
     _todosSubscriber
-        .subscribeTodoUpdated(_accountResourceId, _membershipResourceId, 
+        .subscribeTodoUpdated(_accountResourceId, _membershipResourceId,
             (frugal.FContext context, todo_frugal.Todo todo) {
-        _todoUpdated.add(decode(todo));
+      _todoUpdated.add(decode(todo));
     });
   }
-
 }
